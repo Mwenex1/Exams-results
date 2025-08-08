@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Results Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 {
+            color: #333;
+        }
+        .input-group {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results-container {
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .student-info h2 {
+            text-align: center;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .student-info p {
+            margin: 5px 0;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Styling for the results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .pass {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .fail {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Exam Results Checker</h1>
+        <p>Please enter your secret code to view your results.</p>
+        <div class="input-group">
+            <label for="secret-code">Secret Code:</label>
+            <input type="text" id="secret-code" placeholder="e.g., S-101">
+            <button onclick="checkResults()">Check Results</button>
+        </div>
+        <div id="results-container">
+            </div>
+    </div>
+
+    <script>
+        // Data for students with results for 10 subjects.
+        const students = {
+            "S-101": {
+                name: "Alice Johnson",
+                results: {
+                    "Mathematics": { score: "85%", status: "Pass" },
+                    "Expressive Arts": { score: "92%", status: "Pass" },
+                    "Science and Technology": { score: "78%", status: "Pass" },
+                    "Agriculture": { score: "88%", status: "Pass" },
+                    "English": { score: "75%", status: "Pass" },
+                    "Chichewa": { score: "95%", status: "Pass" },
+                    "Social Studies": { score: "81%", status: "Pass" },
+                    "Life Skills": { score: "90%", status: "Pass" },
+                    "Home Economics": { score: "87%", status: "Pass" },
+                    "Foundation Studies": { score: "89%", status: "Pass" }
+                }
+            },
+            "S-102": {
+                name: "Bob Smith",
+                results: {
+                    "Mathematics": { score: "60%", status: "Pass" },
+                    "Expressive Arts": { score: "71%", status: "Pass" },
+                    "Science and Technology": { score: "55%", status: "Fail" },
+                    "Agriculture": { score: "68%", status: "Pass" },
+                    "English": { score: "70%", status: "Pass" },
+                    "Chichewa": { score: "65%", status: "Pass" },
+                    "Social Studies": { score: "77%", status: "Pass" },
+                    "Life Skills": { score: "82%", status: "Pass" },
+                    "Home Economics": { score: "74%", status: "Pass" },
+                    "Foundation Studies": { score: "58%", status: "Fail" }
+                }
+            },
+            "S-104": {
+                name: "Charlie Brown",
+                results: {
+                    "Mathematics": { score: "52%", status: "Fail" },
+                    "Expressive Arts": { score: "68%", status: "Pass" },
+                    "Science and Technology": { score: "45%", status: "Fail" },
+                    "Agriculture": { score: "59%", status: "Fail" },
+                    "English": { score: "62%", status: "Pass" },
+                    "Chichewa": { score: "70%", status: "Pass" },
+                    "Social Studies": { score: "50%", status: "Fail" },
+                    "Life Skills": { score: "75%", status: "Pass" },
+                    "Home Economics": { score: "61%", status: "Pass" },
+                    "Foundation Studies": { score: "48%", status: "Fail" }
+                }
+            }
+        };
+
+        function checkResults() {
+            const secretCode = document.getElementById('secret-code').value.trim();
+            const resultsContainer = document.getElementById('results-container');
+            
+            resultsContainer.innerHTML = '';
+
+            if (students[secretCode]) {
+                const student = students[secretCode];
+                let resultsHTML = `<div class="student-info"><h2>Results for ${student.name}</h2>`;
+                
+                // Start a table to display the results
+                resultsHTML += `<table class="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Subject</th>
+                                            <th>Score</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                
+                // Loop through each subject in the student's results
+                for (const subject in student.results) {
+                    if (student.results.hasOwnProperty(subject)) {
+                        const result = student.results[subject];
+                        const statusClass = result.status.toLowerCase();
+                        resultsHTML += `<tr>
+                                            <td>${subject}</td>
+                                            <td>${result.score}</td>
+                                            <td class="${statusClass}">${result.status}</td>
+                                        </tr>`;
+                    }
+                }
+                
+                resultsHTML += `</tbody></table></div>`;
+                
+                resultsContainer.innerHTML = resultsHTML;
+            } else {
+                const errorHTML = `<p class="error">Invalid secret code. Please try again.</p>`;
+                resultsContainer.innerHTML = errorHTML;
+            }
+        }
+    </script>
+
+</body>
+</html>
